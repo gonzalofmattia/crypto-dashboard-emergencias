@@ -76,4 +76,6 @@ npm run test
 
 **Infinite scroll** — implementado con useInfiniteQuery de TanStack Query. La tabla carga 20 activos por página y solicita la siguiente automáticamente usando IntersectionObserver.
 
+**Rate limiting** — CoinGecko en el plan gratuito tiene un límite estricto de requests por minuto. En producción esto puede causar que el historial de precios tarde en cargar o falle temporalmente. La app maneja estos casos con reintentos automáticos (retry: 2) y muestra estados de carga y error explícitos en el panel del gráfico. La solución definitiva sería usar un plan pago de CoinGecko o cachear las respuestas en un backend propio.
+
 **Tests E2E** — no incluidos por tiempo. El flujo principal a cubrir sería: carga inicial de la tabla → búsqueda por nombre → click en un activo → visualización del gráfico.

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchPriceHistory } from '../services/coingecko'
 
 export function usePriceHistory(id: string) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['price-history', id],
     queryFn: () => fetchPriceHistory(id),
     enabled: !!id,
@@ -10,5 +10,5 @@ export function usePriceHistory(id: string) {
     retryDelay: 2000,
   })
 
-  return { data: data ?? [], isLoading }
+  return { data: data ?? [], isLoading, isError }
 }

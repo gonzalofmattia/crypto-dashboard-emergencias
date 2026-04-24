@@ -28,15 +28,16 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 
 export function PriceChart({ selectedAsset, onClose }: PriceChartProps) {
   const selectedId = selectedAsset?.id ?? ''
-  const { data, isLoading } = usePriceHistory(selectedId)
+  const { data, isLoading, isError } = usePriceHistory(selectedId)
   const chartData = data.filter((_, index) => index % 24 === 0)
+  const showFailure = !isLoading && (isError || data.length === 0)
 
   if (!selectedAsset) {
     return null
   }
 
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-800 p-4 md:p-6">
+    <section className="min-h-80 rounded-xl border border-gray-800 bg-gray-800 p-4 md:p-6">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-100">
           {selectedAsset.name} - Últimos 7 días
@@ -51,7 +52,11 @@ export function PriceChart({ selectedAsset, onClose }: PriceChartProps) {
       </div>
 
       {isLoading ? (
-        <div className="h-72 animate-pulse rounded-lg bg-gray-700" />
+        <div className="h-64 animate-pulse rounded-lg bg-gray-700" />
+      ) : showFailure ? (
+        <div className="flex h-64 items-center justify-center px-4 text-center text-sm text-gray-400">
+          No se pudo cargar el historial. Intentá de nuevo en unos segundos.
+        </div>
       ) : (
         <div>
           <ResponsiveContainer width="100%" height={300}>
