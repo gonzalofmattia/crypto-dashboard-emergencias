@@ -6,6 +6,8 @@ export function usePriceHistory(id: string) {
     queryKey: ['price-history', id],
     queryFn: () => fetchPriceHistory(id),
     enabled: !!id,
+    retry: 2,
+    retryDelay: 2000,
   })
 
   return { data: data ?? [], isLoading }

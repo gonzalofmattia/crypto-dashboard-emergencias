@@ -17,6 +17,8 @@ export function useAssets() {
     getNextPageParam: (lastPage, _allPages, lastPageParam) =>
       lastPage.length === 20 ? lastPageParam + 1 : undefined,
     staleTime: 30_000,
+    retry: 2,
+    retryDelay: 3000,
   })
 
   const assets = useMemo(() => data?.pages.flat() ?? [], [data])
