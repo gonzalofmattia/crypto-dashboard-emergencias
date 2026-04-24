@@ -18,12 +18,17 @@ npm run dev
 
 La app queda disponible en `http://localhost:5173`.
 
+## Demo
+
+https://crypto-dashboard-emergencias.vercel.app
+
 ## Scripts disponibles
 
 ```bash
 npm run dev      # servidor de desarrollo
 npm run build    # build de producción
 npm run test     # corre los tests con Vitest
+npm run test:e2e # corre los tests E2E con Playwright
 ```
 
 ## Stack y decisiones de arquitectura
@@ -78,4 +83,4 @@ npm run test
 
 **Rate limiting** — CoinGecko en el plan gratuito tiene un límite estricto de requests por minuto. En producción esto puede causar que el historial de precios tarde en cargar o falle temporalmente. La app maneja estos casos con reintentos automáticos (retry: 2) y muestra estados de carga y error explícitos en el panel del gráfico. La solución definitiva sería usar un plan pago de CoinGecko o cachear las respuestas en un backend propio.
 
-**Tests E2E** — no incluidos por tiempo. El flujo principal a cubrir sería: carga inicial de la tabla → búsqueda por nombre → click en un activo → visualización del gráfico.
+**Tests E2E** — implementados con Playwright en la carpeta `e2e/`. El flujo cubre: carga inicial, verificación de datos en tabla, selección de activo y visualización del gráfico, búsqueda y filtrado. Los tests mockean la API de CoinGecko para ser estables e independientes del rate limit del plan gratuito.
