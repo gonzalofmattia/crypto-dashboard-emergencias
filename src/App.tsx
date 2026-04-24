@@ -1,4 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { SearchBar } from './components/SearchBar'
 import { AssetTable } from './components/AssetTable'
@@ -11,7 +18,20 @@ const PriceChart = lazy(() =>
   import('./components/PriceChart').then((m) => ({ default: m.PriceChart })),
 )
 
+function useIsLg() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      const mq = window.matchMedia('(min-width: 1024px)')
+      mq.addEventListener('change', onStoreChange)
+      return () => mq.removeEventListener('change', onStoreChange)
+    },
+    () => window.matchMedia('(min-width: 1024px)').matches,
+    () => false,
+  )
+}
+
 function Dashboard() {
+  const isLg = useIsLg()
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
@@ -33,23 +53,37 @@ function Dashboard() {
     }
   }, [assets])
 
+  const chartFallback = (
+    <div className="h-80 w-full animate-pulse rounded-lg bg-gray-800 lg:w-96" />
+  )
+
   return (
     <main className="flex min-h-screen flex-col bg-gray-900 px-4 py-8 text-gray-100 md:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 min-h-0">
-        <div className="flex min-h-0 flex-1 gap-6">
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
-            <header className="shrink-0 space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight">Crypto Dashboard</h1>
-              <p className="text-sm text-gray-400">
-                Monitoreo en tiempo real de las 20 criptomonedas con mayor market cap.
-              </p>
-            </header>
+      <div className="mx-auto flex w-full max-w-7xl min-h-0 flex-1 flex-col gap-6">
+        <header className="shrink-0 space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Crypto Dashboard</h1>
+          <p className="text-sm text-gray-400">
+            Monitoreo en tiempo real de las 20 criptomonedas con mayor market cap.
+          </p>
+        </header>
 
-            <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        <div className="shrink-0">
+          <SearchBar value={searchTerm} onChange={setSearchTerm} />
+        </div>
 
+        {selectedAsset && !isLg ? (
+          <div className="w-full shrink-0">
+            <Suspense fallback={chartFallback}>
+              <PriceChart selectedAsset={selectedAsset} onClose={() => setSelectedAsset(null)} />
+            </Suspense>
+          </div>
+        ) : null}
+
+        <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row lg:items-start">
+          <div className="flex min-w-0 flex-1 flex-col lg:min-h-0">
             <div
               ref={tableScrollRef}
-              className="custom-scrollbar max-h-[calc(100vh-12rem)] min-h-0 flex-1 overflow-y-auto"
+              className="custom-scrollbar lg:max-h-[calc(100vh-12rem)] lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
             >
               <AssetTable
                 assets={assets}
@@ -60,17 +94,15 @@ function Dashboard() {
                 fetchNextPage={fetchNextPage}
                 hasNextPage={hasNextPage ?? false}
                 isFetchingNextPage={isFetchingNextPage}
-                scrollRootRef={tableScrollRef}
+                scrollRootRef={isLg ? tableScrollRef : undefined}
                 selectedAssetId={selectedAsset?.id ?? null}
               />
             </div>
           </div>
 
-          {selectedAsset ? (
-            <div className="sticky top-4 w-96 shrink-0 self-start">
-              <Suspense
-                fallback={<div className="h-80 animate-pulse rounded-lg bg-gray-800" />}
-              >
+          {selectedAsset && isLg ? (
+            <div className="w-full shrink-0 lg:sticky lg:top-4 lg:w-96 lg:self-start">
+              <Suspense fallback={chartFallback}>
                 <PriceChart selectedAsset={selectedAsset} onClose={() => setSelectedAsset(null)} />
               </Suspense>
             </div>

@@ -37,7 +37,7 @@ export function PriceChart({ selectedAsset, onClose }: PriceChartProps) {
   }
 
   return (
-    <section className="min-h-80 rounded-xl border border-gray-800 bg-gray-800 p-4 md:p-6">
+    <section className="min-h-80 w-full rounded-xl border border-gray-800 bg-gray-800 p-4 md:p-6 lg:w-96">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-100">
           {selectedAsset.name} - Últimos 7 días
