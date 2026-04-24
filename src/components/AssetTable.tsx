@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { AssetRow } from './AssetRow'
 import { SkeletonRow } from './SkeletonRow'
 import type { Asset } from '../types'
@@ -49,17 +49,19 @@ export function AssetTable({
     return () => observer.disconnect()
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, isLoading])
 
-  const normalizedSearch = searchTerm.trim().toLowerCase()
-  const filteredAssets = assets.filter((asset) => {
-    if (!normalizedSearch) {
-      return true
-    }
+  const filteredAssets = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase()
+    return assets.filter((asset) => {
+      if (!normalizedSearch) {
+        return true
+      }
 
-    return (
-      asset.name.toLowerCase().includes(normalizedSearch) ||
-      asset.symbol.toLowerCase().includes(normalizedSearch)
-    )
-  })
+      return (
+        asset.name.toLowerCase().includes(normalizedSearch) ||
+        asset.symbol.toLowerCase().includes(normalizedSearch)
+      )
+    })
+  }, [assets, searchTerm])
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">

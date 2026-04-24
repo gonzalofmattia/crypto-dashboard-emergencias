@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { SearchBar } from './components/SearchBar'
 import { AssetTable } from './components/AssetTable'
-import { PriceChart } from './components/PriceChart'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { useAssets } from './hooks/useAssets'
 import type { Asset } from './types'
 import { queryClient } from './queryClient'
+
+const PriceChart = lazy(() =>
+  import('./components/PriceChart').then((m) => ({ default: m.PriceChart })),
+)
 
 function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -43,7 +47,11 @@ function Dashboard() {
         />
 
         {selectedAsset && (
-          <PriceChart selectedAsset={selectedAsset} onClose={() => setSelectedAsset(null)} />
+          <Suspense
+            fallback={<div className="h-80 animate-pulse rounded-lg bg-gray-800" />}
+          >
+            <PriceChart selectedAsset={selectedAsset} onClose={() => setSelectedAsset(null)} />
+          </Suspense>
         )}
       </div>
     </main>
@@ -53,7 +61,9 @@ function Dashboard() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Dashboard />
+      <ErrorBoundary>
+        <Dashboard />
+      </ErrorBoundary>
     </QueryClientProvider>
   )
 }
