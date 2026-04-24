@@ -1,19 +1,19 @@
 import '@testing-library/jest-dom'
+import { vi } from 'vitest'
 
-class IntersectionObserverMock implements IntersectionObserver {
-  readonly root: Element | Document | null = null
-  readonly rootMargin = ''
-  readonly thresholds: ReadonlyArray<number> = []
-  disconnect() {}
-  observe() {}
-  takeRecords(): IntersectionObserverEntry[] {
-    return []
-  }
-  unobserve() {}
-}
+const mockIntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+  scrollMargin: '',
+  root: null,
+  rootMargin: '',
+  thresholds: [],
+  takeRecords: vi.fn(),
+}))
 
-Object.defineProperty(globalThis, 'IntersectionObserver', {
+Object.defineProperty(window, 'IntersectionObserver', {
   writable: true,
   configurable: true,
-  value: IntersectionObserverMock,
+  value: mockIntersectionObserver,
 })
