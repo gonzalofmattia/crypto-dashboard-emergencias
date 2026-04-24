@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { AssetRow } from './AssetRow'
 import { SkeletonRow } from './SkeletonRow'
 import type { Asset } from '../types'
@@ -8,6 +9,9 @@ interface AssetTableProps {
   isError: boolean
   searchTerm: string
   onSelectAsset: (asset: Asset) => void
+  fetchNextPage: () => void
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
 }
 
 export function AssetTable({
@@ -16,7 +20,35 @@ export function AssetTable({
   isError,
   searchTerm,
   onSelectAsset,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
 }: AssetTableProps) {
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = loadMoreRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries
+        if (
+          entry?.isIntersecting &&
+          hasNextPage &&
+          !isLoading &&
+          !isFetchingNextPage
+        ) {
+          fetchNextPage()
+        }
+      },
+      { root: null, rootMargin: '0px', threshold: 0 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isLoading])
+
   const normalizedSearch = searchTerm.trim().toLowerCase()
   const filteredAssets = assets.filter((asset) => {
     if (!normalizedSearch) {
@@ -54,11 +86,21 @@ export function AssetTable({
                       </td>
                     </tr>
                   )
-              : filteredAssets.map((asset) => (
-                  <AssetRow key={asset.id} asset={asset} onSelect={onSelectAsset} />
-                ))}
+                : (
+                    <>
+                      {filteredAssets.map((asset) => (
+                        <AssetRow key={asset.id} asset={asset} onSelect={onSelectAsset} />
+                      ))}
+                      {isFetchingNextPage
+                        ? Array.from({ length: 3 }).map((_, index) => (
+                            <SkeletonRow key={`next-${index}`} />
+                          ))
+                        : null}
+                    </>
+                  )}
           </tbody>
         </table>
+        <div ref={loadMoreRef} className="h-2 w-full shrink-0" />
       </div>
       {!isLoading && !isError && filteredAssets.length === 0 && (
         <p className="px-4 py-6 text-center text-sm text-gray-400">

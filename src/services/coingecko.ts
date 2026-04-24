@@ -1,10 +1,9 @@
 import type { Asset, PricePoint } from '../types'
 
-const ASSETS_URL =
-  'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1'
-
-export async function fetchAssets(): Promise<Asset[]> {
-  const response = await fetch(ASSETS_URL)
+export async function fetchAssets(page: number): Promise<Asset[]> {
+  const response = await fetch(
+    `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=${page}`,
+  )
   if (!response.ok) {
     throw new Error('Failed to fetch assets')
   }

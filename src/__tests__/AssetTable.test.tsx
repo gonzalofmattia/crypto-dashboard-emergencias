@@ -25,6 +25,9 @@ describe('AssetTable', () => {
         isError={false}
         searchTerm=""
         onSelectAsset={vi.fn()}
+        fetchNextPage={vi.fn()}
+        hasNextPage={false}
+        isFetchingNextPage={false}
       />,
     )
     expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0)
@@ -38,6 +41,9 @@ describe('AssetTable', () => {
         isError={false}
         searchTerm=""
         onSelectAsset={vi.fn()}
+        fetchNextPage={vi.fn()}
+        hasNextPage={false}
+        isFetchingNextPage={false}
       />,
     )
     expect(screen.getByText('Bitcoin')).toBeInTheDocument()

@@ -1,13 +1,29 @@
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchAssets } from '../services/coingecko'
 
 export function useAssets() {
-  const { data, isLoading, isError } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['assets'],
-    queryFn: fetchAssets,
+    queryFn: ({ pageParam }) => fetchAssets(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.length === 20 ? lastPageParam + 1 : undefined,
     staleTime: 30_000,
-    refetchInterval: 60_000,
   })
 
-  return { assets: data ?? [], isLoading, isError }
+  return {
+    assets: data?.pages.flat() ?? [],
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  }
 }

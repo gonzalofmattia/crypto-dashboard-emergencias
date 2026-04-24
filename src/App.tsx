@@ -10,7 +10,14 @@ import { queryClient } from './queryClient'
 function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
-  const { assets, isLoading, isError } = useAssets()
+  const {
+    assets,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useAssets()
 
   return (
     <main className="min-h-screen bg-gray-900 px-4 py-8 text-gray-100 md:px-8">
@@ -30,6 +37,9 @@ function Dashboard() {
           isError={isError}
           searchTerm={searchTerm}
           onSelectAsset={setSelectedAsset}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage ?? false}
+          isFetchingNextPage={isFetchingNextPage}
         />
 
         {selectedAsset && (
