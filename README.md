@@ -64,10 +64,16 @@ Los tests están en `src/__tests__/` y cubren:
 npm run test
 ```
 
+## Decisiones de UX
+
+- El gráfico se muestra en un panel lateral fijo para no interrumpir el scroll de la tabla.
+- Al cargar la app se selecciona automáticamente el primer activo para que el gráfico siempre tenga contenido visible.
+- La fila seleccionada se resalta visualmente para dar contexto sobre qué activo se está visualizando en el gráfico.
+
 ## Trade-offs
 
 **WebSockets vs polling** — CoinGecko en el plan gratuito no expone WebSockets. Implementé polling con TanStack Query como alternativa viable. En un entorno de producción con acceso a una API que soporte WebSockets, el hook `useAssets` se podría reemplazar por una conexión persistente sin cambiar ningún componente.
 
-**Paginación** — la tabla muestra los 20 activos de mayor capitalización sin paginación adicional. Con más tiempo implementaría infinite scroll usando el parámetro `page` de la API y el hook `useInfiniteQuery` de TanStack Query.
+**Infinite scroll** — implementado con useInfiniteQuery de TanStack Query. La tabla carga 20 activos por página y solicita la siguiente automáticamente usando IntersectionObserver.
 
 **Tests E2E** — no incluidos por tiempo. El flujo principal a cubrir sería: carga inicial de la tabla → búsqueda por nombre → click en un activo → visualización del gráfico.

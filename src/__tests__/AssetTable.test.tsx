@@ -28,6 +28,7 @@ describe('AssetTable', () => {
         fetchNextPage={vi.fn()}
         hasNextPage={false}
         isFetchingNextPage={false}
+        selectedAssetId={null}
       />,
     )
     expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0)
@@ -44,6 +45,7 @@ describe('AssetTable', () => {
         fetchNextPage={vi.fn()}
         hasNextPage={false}
         isFetchingNextPage={false}
+        selectedAssetId={null}
       />,
     )
     expect(screen.getByText('Bitcoin')).toBeInTheDocument()

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchAssets } from '../services/coingecko'
 
@@ -18,8 +19,10 @@ export function useAssets() {
     staleTime: 30_000,
   })
 
+  const assets = useMemo(() => data?.pages.flat() ?? [], [data])
+
   return {
-    assets: data?.pages.flat() ?? [],
+    assets,
     isLoading,
     isError,
     fetchNextPage,

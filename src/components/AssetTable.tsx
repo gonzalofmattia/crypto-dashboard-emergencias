@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { AssetRow } from './AssetRow'
 import { SkeletonRow } from './SkeletonRow'
 import type { Asset } from '../types'
@@ -12,6 +12,8 @@ interface AssetTableProps {
   fetchNextPage: () => void
   hasNextPage: boolean
   isFetchingNextPage: boolean
+  scrollRootRef?: RefObject<HTMLDivElement | null>
+  selectedAssetId: string | null
 }
 
 export function AssetTable({
@@ -23,12 +25,20 @@ export function AssetTable({
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
+  scrollRootRef,
+  selectedAssetId,
 }: AssetTableProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null)
+  const searchActive = searchTerm.trim().length > 0
+  const infiniteScrollEnabled = hasNextPage && !searchActive
 
   useEffect(() => {
+    if (!infiniteScrollEnabled) return
+
     const el = loadMoreRef.current
     if (!el) return
+
+    const root = scrollRootRef?.current ?? undefined
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -37,17 +47,26 @@ export function AssetTable({
           entry?.isIntersecting &&
           hasNextPage &&
           !isLoading &&
-          !isFetchingNextPage
+          !isFetchingNextPage &&
+          !searchTerm.trim()
         ) {
           fetchNextPage()
         }
       },
-      { root: null, rootMargin: '0px', threshold: 0 },
+      { root, rootMargin: '0px', threshold: 0 },
     )
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isLoading])
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    infiniteScrollEnabled,
+    isFetchingNextPage,
+    isLoading,
+    scrollRootRef,
+    searchTerm,
+  ])
 
   const filteredAssets = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
@@ -91,9 +110,14 @@ export function AssetTable({
                 : (
                     <>
                       {filteredAssets.map((asset) => (
-                        <AssetRow key={asset.id} asset={asset} onSelect={onSelectAsset} />
+                        <AssetRow
+                          key={asset.id}
+                          asset={asset}
+                          onSelect={onSelectAsset}
+                          isSelected={asset.id === selectedAssetId}
+                        />
                       ))}
-                      {isFetchingNextPage
+                      {infiniteScrollEnabled && isFetchingNextPage
                         ? Array.from({ length: 3 }).map((_, index) => (
                             <SkeletonRow key={`next-${index}`} />
                           ))
@@ -102,7 +126,9 @@ export function AssetTable({
                   )}
           </tbody>
         </table>
-        <div ref={loadMoreRef} className="h-2 w-full shrink-0" />
+        {infiniteScrollEnabled ? (
+          <div ref={loadMoreRef} className="h-2 w-full shrink-0" />
+        ) : null}
       </div>
       {!isLoading && !isError && filteredAssets.length === 0 && (
         <p className="px-4 py-6 text-center text-sm text-gray-400">

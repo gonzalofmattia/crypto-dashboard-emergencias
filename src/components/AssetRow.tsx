@@ -4,6 +4,7 @@ import { formatPrice } from '../utils/formatPrice'
 interface AssetRowProps {
   asset: Asset
   onSelect: (asset: Asset) => void
+  isSelected: boolean
 }
 
 const compactUsdFormatter = new Intl.NumberFormat('en-US', {
@@ -15,16 +16,16 @@ const compactUsdFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
-export function AssetRow({ asset, onSelect }: AssetRowProps) {
+export function AssetRow({ asset, onSelect, isSelected }: AssetRowProps) {
   const change = asset.price_change_percentage_24h ?? 0
   const changeColor = change >= 0 ? 'text-green-400' : 'text-red-400'
   const formattedSymbol = asset.symbol.toUpperCase()
+  const rowClass = isSelected
+    ? 'cursor-pointer border-b border-gray-800 bg-gray-700 transition'
+    : 'cursor-pointer border-b border-gray-800 transition hover:bg-gray-800/70'
 
   return (
-    <tr
-      className="cursor-pointer border-b border-gray-800 transition hover:bg-gray-800/70"
-      onClick={() => onSelect(asset)}
-    >
+    <tr className={rowClass} onClick={() => onSelect(asset)}>
       <td className="px-4 py-4 text-gray-300">{asset.market_cap_rank}</td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-3">
